@@ -103,7 +103,7 @@ def analyze_reports():
         if is_safe(sublist):
             correct_reports += 1
         else:
-            # Try removing each level once and check if it becomes safe
+            # remove each level once and check if safe
             for i in range(len(sublist)):
                 modified_list = sublist[:i] + sublist[i + 1 :]
                 if is_safe(modified_list):
@@ -113,9 +113,5 @@ def analyze_reports():
     return correct_reports
 
 
-# Call the function
 num_safe_reports = analyze_reports()
-print(f"Number of safe reports: {num_safe_reports}")
-
-
-analyze_reports()
+print(f"safe reports: {num_safe_reports}")
