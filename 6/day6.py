@@ -11,7 +11,7 @@ def read_input():
     rows = len(matrix)
     cols = len(matrix[0])
 
-    visited = [[0 for _ in range(cols)] for _ in range(rows)]
+    visited = [[(0, "") for _ in range(cols)] for _ in range(rows)]
 
     return matrix, visited
 
@@ -50,15 +50,15 @@ def get_next_position(pos, direction):
         y -= 1
     return x, y
 
-def check_next(matrix, pos, direction):
-    # Get the next position based on the direction
+def check_next(matrix, pos, direction, visited):
     next_x, next_y = get_next_position(pos, direction)
     
-    # Check if the new position is out of bounds
     if is_oob(matrix, next_x, next_y):
         return 'finished'
     
-    # Check the value at the new position
+    if has_visited(visited, pos, direction):
+        return 'loop'
+    
     return 'false' if matrix[next_x][next_y] == '#' else 'true'
 
 def rotate(direction):
@@ -68,34 +68,69 @@ def rotate(direction):
     new_direction = directions[(current_index + 1) % len(directions)]
     return new_direction
 
-def add_visited(visited, pos, count):
+def add_visited(visited, pos, direction):
     x, y = pos
-    if visited[x][y] == 0:
-        visited[x][y] = 1
-        count += 1
-    return visited, count
+    if visited[x][y][0] == 0:
+        visited[x][y] = (1, direction)
+    return visited
 
-def predict_route():
+def has_visited(visited, pos, direction):
+    x,y = pos
+    if visited[x][y] == (1, direction):
+        return True
+    return False
+
+
+def predict_route(matrix):
     
-    matrix, visited = read_input()
+    _, visited = read_input()
     pos, direction = find_start_pos(matrix)
-    count = 0
+    loop = False
 
     while True:
-        next_step = check_next(matrix, pos, direction)
+        next_step = check_next(matrix, pos, direction, visited)
         # print(next_step)
         if next_step == 'finished':
-            visited, count = add_visited(visited, pos, count)
+            visited = add_visited(visited, pos, direction)
             break
         elif next_step == 'true':
-            visited, count = add_visited(visited, pos, count)
+            visited = add_visited(visited, pos, direction)
             pos = take_step(pos, direction)
         elif next_step == 'false':
             direction = rotate(direction)
-    # print(visited)
-    return count
+        elif next_step == 'loop':
+            loop = True
+            break
+
+    return visited, loop
 
 
+import copy, time
 
-sum = predict_route()
-print(sum)
+def main():
+
+    start = time.time()
+    original_matrix, _ = read_input()
+    start_pos, _ = find_start_pos(original_matrix)
+    visited,_ = predict_route(original_matrix)
+    success_count = 0
+
+    for i in range(len(visited)):
+        for j in range(len(visited[0])):
+            if (i, j) == start_pos:
+                continue
+
+            matrix = copy.deepcopy(original_matrix)
+            
+            if visited[i][j][0] == 1:
+                matrix[i][j] = '#'
+                
+                _, loop = predict_route(matrix)
+                
+                if loop:
+                    success_count += 1
+    end = time.time()
+    print("time: ", end - start)
+    print("succesful: ", success_count)
+
+main()
