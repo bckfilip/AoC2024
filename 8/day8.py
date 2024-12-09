@@ -33,17 +33,38 @@ def has_visited(pos, antinodes):
         return True
     return False
 
-def calculate_positions(current_coord, next_coord):
+def calculate_positions(current_coord, next_coord, antinodes):
     x1, y1 = current_coord
     x2, y2 = next_coord
-    
+    positions = [current_coord, next_coord]
+
     delta_x = x2 - x1
     delta_y = y2 - y1
 
-    pos1 = (x1 - delta_x, y1 - delta_y)  
-    pos2 = (x2 + delta_x, y2 + delta_y)  
+    #check first cord
+    while True:
+        x1 -= delta_x
+        y1 -= delta_y
+        pos1 = (x1, y1)
+        if not is_oob(pos1, antinodes):
+            positions.append(pos1)
+        else:
+            break
 
-    return pos1, pos2
+    x1, y1 = current_coord
+    x2, y2 = next_coord
+
+    # check next cord
+    while True:
+        x2 += delta_x
+        y2 += delta_y
+        pos2 = (x2, y2)
+        if not is_oob(pos2, antinodes):
+            positions.append(pos2)
+        else:
+            break
+
+    return positions
 
 def add_antinode(pos, antinodes):
     x, y = pos
@@ -62,10 +83,9 @@ def count_unique_antinodes():
         for i, current_coord in enumerate(coordinates):
             for next_coord in coordinates[i + 1:]:
 
-                pos1, pos2 = calculate_positions(current_coord, next_coord)
+                positions = calculate_positions(current_coord, next_coord, antinodes)
 
-                for pos in (pos1, pos2): 
-                    if not is_oob(pos, antinodes):
+                for pos in (positions): 
                         if not has_visited(pos, antinodes):
                             antinodes = add_antinode(pos, antinodes)
                             count += 1
