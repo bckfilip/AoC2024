@@ -9,20 +9,20 @@ def read_input():
     for block in blocks:
         lines = block.split("\n")
         
-        # values for A
+        # values button a
         button_a_values = lines[0].split(":")[1].strip().split(", ")
         x_a = int(button_a_values[0].split("+")[1])
         y_a = int(button_a_values[1].split("+")[1])
         
-        #values  B
+        #b
         button_b_values = lines[1].split(":")[1].strip().split(", ")
         x_b = int(button_b_values[0].split("+")[1])
         y_b = int(button_b_values[1].split("+")[1])
         
-        # results
+        # result + 10000000000
         prize_values = lines[2].split(":")[1].strip().split(", ")
-        x_prize = int(prize_values[0].split("=")[1])
-        y_prize = int(prize_values[1].split("=")[1])
+        x_prize = int(prize_values[0].split("=")[1]) + 10**13
+        y_prize = int(prize_values[1].split("=")[1]) + 10**13
         
         scenario = {
             'A': (x_a, y_a),
@@ -38,21 +38,25 @@ def solve(scenario):
     ax, ay = scenario['A']
     bx, by = scenario['B']
     tx, ty = scenario['Prize']
-    outputs = []
-    for a in range(100):
-        for b in range(100):
-            if ax * a + bx * b == tx and ay * a + by * b == ty:
-                outputs.append(3 * a + b)
-    if not outputs:
-        return 0
+
+    # cramers rule 
+    
+    denominator = (ay * bx) - (by * ax)
+    if denominator == 0:
+        return 0  
+
+    b = ( (tx * ay) - (ty * ax) ) // denominator
+    a = ( (tx * by) - (ty * bx) ) // ( (by * ax) - (bx * ay) )
+
+    if ( (ax * a) + (bx * b) ) == tx and ( (ay * a) + (by * b) ) == ty:
+        return 3 * a + b
     else:
-        return min(outputs)
+        return 0
 
 def calc():
     scenarios = read_input()
     total_tokens = sum(solve(scenario) for scenario in scenarios)
     return total_tokens
 
-# Example usage
 total_tokens = calc()
-print("Total tokens:", total_tokens)
+print(" tokens:", total_tokens)
