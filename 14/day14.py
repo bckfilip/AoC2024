@@ -19,21 +19,39 @@ def read_input():
 
     return dict(guards)
 
+def write_map_to_file(guards, iteration, file):
+    
+    map_ = [["-"] * 103 for _ in range(101)]
+
+    for position in guards:
+        map_[position[0]][position[1]] = "X"
+
+    file.write(f"Iteration {iteration}:\n")
+    for row in map_:
+        file.write(''.join(map(str, row)) + "\n")
+    file.write("\n")
 
 def move(guards, iterations):
-    for i in range(iterations):
-        new_guards = defaultdict(list)
-        for position in guards:
-            for velocity in guards[position]:
-                new_x = (position[0] + velocity[0]) % 101
-                new_y = (position[1] + velocity[1]) % 103
-                new_guards[new_x, new_y].append(velocity)
-        guards = new_guards
+    with open("output.txt", "w") as file:
+        for i in range(iterations):
+            new_guards = defaultdict(list)
+            for position in guards:
+                for velocity in guards[position]:
+                    new_x = (position[0] + velocity[0]) % 101
+                    new_y = (position[1] + velocity[1]) % 103
+                    new_guards[new_x, new_y].append(velocity)
+            guards = new_guards
+
+            # Write the map every 10 iterations
+            ## FOUND IT :D 
+            if i == 6875:
+                write_map_to_file(guards, i, file)
+
     return guards
 
 def main():
     guards = read_input()
-    guards = move(guards, 100)
+    guards = move(guards, 10000)
     x1 = x2 = x3 = x4 = 0
 
     for position in guards:
@@ -59,7 +77,7 @@ def main():
     print(f"x1: {x1}, x2: {x2}, x3: {x3}, x4: {x4}")
     summa = x1 * x2 * x3 * x4
     print(summa)
-    print(guards)
+    #print(guards)
     return summa
 
 main()
